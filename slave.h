@@ -1,0 +1,1 @@
+void write_to_pipe (int file); 
