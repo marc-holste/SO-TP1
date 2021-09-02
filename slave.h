@@ -1,1 +1,1 @@
-void write_to_pipe (int file); 
+int read_from_pipe (int file);

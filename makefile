@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS=-std=gnu99 -Wall
 OUTPUT_EXEC=solve
+INPUT_FILES=files/*
 OUTPUT_FILE=out.txt
 
 all: compile clean
@@ -17,4 +18,4 @@ clean:
 delete:
 	rm -f $(OUTPUT_EXEC) view
 run:
-	./$(OUTPUT_EXEC) 
+	./$(OUTPUT_EXEC) $(INPUT_FILES)

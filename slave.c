@@ -3,13 +3,41 @@
  #include <stdio.h>
  #include <stdlib.h>
 
-void write_to_pipe (int file)
- {
-   /* Writes in the pipe. */
-   FILE *stream;
-   stream = fdopen (file, "w");
-   fprintf (stream, "Im writing through pipes\n");
-   fprintf (stream, "Seems to work\n");
-   fprintf (stream, "Makefile is done\n");
-   fclose (stream);
- } 
+#define MAX_FILENAME_LENGTH 256
+
+//Declaration is in master
+extern char *outputfilename;
+
+//Demo
+void process(char *filename) {
+    FILE *stream = fopen (filename, "r");
+    FILE *outputfile = fopen(outputfilename,"a");
+    int c;
+
+    while ((c = fgetc (stream)) != EOF) {
+        fprintf(outputfile,"%c", c);
+    }
+    fprintf(outputfile,"%s finished proccesing\n",filename);
+
+    fclose (stream);
+    fclose(outputfile);
+    return;
+}
+
+//Reads the filename and process it
+int read_from_pipe (int file) {
+    FILE *stream = fdopen (file, "r");
+    int c;
+    char filename[MAX_FILENAME_LENGTH]; 
+    int i=0;
+    while( (c = fgetc(stream)) != EOF && i<MAX_FILENAME_LENGTH-1) {
+        filename[i++] = c;
+    }
+    filename[i]=0;
+    if(i == MAX_FILENAME_LENGTH-1) {
+        return EXIT_FAILURE;
+    }
+    fclose(stream);
+    process(filename);
+    return EXIT_SUCCESS;
+}
