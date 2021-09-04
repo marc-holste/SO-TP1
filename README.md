@@ -3,6 +3,9 @@
 To compile the project execute the following command:
     make all
 
+To install minisat execute the following command:
+    make install
+
 To run the project execute the following command:
     make run
 

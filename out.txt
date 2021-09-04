@@ -1,0 +1,77 @@
+Filename: files/aim-50-1_6-yes1-4.cnf
+Slave ID = 2590
+Number of variables:            50
+Number of clauses:              80
+CPU time              : 0.015625 s
+SATISFIABLE
+
+Filename: files/aim-100-1_6-no-1.cnf
+Slave ID = 2589
+Number of variables:           100
+Number of clauses:             160
+CPU time              : 0 s
+UNSATISFIABLE
+
+Filename: files/bf0432-007.cnf
+Slave ID = 2591
+Number of variables:          1040
+Number of clauses:            3369
+CPU time              : 0.015625 s
+UNSATISFIABLE
+
+Filename: files/dubois22.cnf
+Slave ID = 2591
+Number of variables:            66
+Number of clauses:             176
+CPU time              : 0 s
+UNSATISFIABLE
+
+Filename: files/dubois21.cnf
+Slave ID = 2589
+Number of variables:            63
+Number of clauses:             168
+CPU time              : 0 s
+UNSATISFIABLE
+
+Filename: files/dubois20.cnf
+Slave ID = 2590
+Number of variables:            60
+Number of clauses:             160
+CPU time              : 0 s
+UNSATISFIABLE
+
+Filename: files/quinn.cnf
+Slave ID = 2590
+Number of variables:            16
+Number of clauses:              18
+CPU time              : 0 s
+SATISFIABLE
+
+Filename: files/simple_v3_c2.cnf
+Slave ID = 2590
+Number of variables:             3
+Number of clauses:               2
+CPU time              : 0 s
+SATISFIABLE
+
+Filename: files/par8-1-c.cnf
+Slave ID = 2589
+Number of variables:            64
+Number of clauses:             254
+CPU time              : 0 s
+SATISFIABLE
+
+Filename: files/hole6.cnf
+Slave ID = 2591
+Number of variables:            42
+Number of clauses:             133
+CPU time              : 0 s
+UNSATISFIABLE
+
+Filename: files/zebra_v155_c1135.cnf
+Slave ID = 2590
+Number of variables:           155
+Number of clauses:            1067
+CPU time              : 0 s
+SATISFIABLE
+

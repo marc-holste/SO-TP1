@@ -12,6 +12,9 @@ compile:
 	$(CC) $(CFLAGS) -o $(OUTPUT_EXEC) master.o slave.o 
 	$(CC) $(CFLAGS) -o view view.c
 
+install: 
+	apt-get install minisat
+	
 clean:
 	rm -f *.o $(OUTPUT_FILE) 
 	

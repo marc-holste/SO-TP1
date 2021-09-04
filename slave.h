@@ -1,1 +1,0 @@
-int read_from_pipe (int file);
