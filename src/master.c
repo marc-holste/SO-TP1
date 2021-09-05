@@ -1,4 +1,4 @@
-#include "masterSlave.h"
+#include "include/masterSlave.h"
 
 #define POUT_PATH "/tmp/pout"
 #define PIN_PATH "/tmp/pin"

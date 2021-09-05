@@ -1,4 +1,4 @@
-#include "masterSlave.h"
+#include "include/masterSlave.h"
 
 // Minisat Path 
 #define MINISAT_PATH      "minisat "
