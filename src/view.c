@@ -6,9 +6,6 @@
 void verror (const char *err) {
     fprintf(stderr, "[view] %s", err);
 }
-void verror2 (int a) {
-    fprintf(stderr, "[view] %d\n", a);
-}
 
 int main (int argc, char *argv[]) {
     //Here comes view
