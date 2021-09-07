@@ -6,6 +6,10 @@
 #define MAX_SLAVES_DIGIT 3 //max amount of slaves 99 + '0' (end of string)
 #define PIPE_PATH_MAX 20
 
+void merror (const char *err) {
+    fprintf(stderr, "[master] %s", err);
+}
+
 //returns the highest value of the set of file descriptors
 int max_fd(int fd_slaves[],int dim) {
     if(dim <= 0) {
@@ -48,7 +52,7 @@ void toString(int num,char* resp){
 
  int main (int argc, char *argv[]) {
     if(argc < 2) {
-        perror("[master] No files to process\n");
+        merror("No files to process\n");
         exit(EXIT_FAILURE);
     } else {
 
@@ -58,7 +62,7 @@ void toString(int num,char* resp){
         //creates outputfile
         FILE *outputfile = fopen(OUTPUT_NAME,"w");
         if(outputfile == NULL) {
-            perror("[master] Open output file error\n");
+            merror("Open output file error\n");
             exit(EXIT_FAILURE);
         }
 
@@ -85,18 +89,18 @@ void toString(int num,char* resp){
             remove(pout_path);
             remove(pin_path);
             if(mkfifo(pout_path, S_IRUSR|S_IWUSR) == -1){
-                perror("[master] mkfifo pout error");
+                merror("mkfifo pout error");
                 exit(EXIT_FAILURE);
             }
             if(mkfifo(pin_path, S_IRUSR|S_IWUSR) == -1){
-                perror("[master] mkfifo pin error");
+                merror("mkfifo pin error");
                 exit(EXIT_FAILURE);
             }
             //creating slaves
             pid_t pid;
             pid = fork();
             if(pid == -1) {
-                perror("[master] fork error:");
+                merror("fork error:");
                 exit(EXIT_FAILURE);
             } 
             //slave
@@ -107,11 +111,11 @@ void toString(int num,char* resp){
             else {
                 //connects pipes with slave
                 if((pout_set[slaves-1] = open(pout_path, O_WRONLY)) == -1){
-                    perror("[master] open pout error");
+                    merror("Error in Open Pout");
                     exit(EXIT_FAILURE);
                 }
                 if((pin_set[slaves-1] = open(pin_path, O_RDONLY)) == -1){
-                    perror("[master] open pin error");
+                    merror("Error in Open Pin");
                     exit(EXIT_FAILURE);
                 }
             }
@@ -143,7 +147,7 @@ void toString(int num,char* resp){
 
             //waits until a slave finishes
             if(select(maxfd+1,&fd_set_slaves,NULL,NULL,NULL) < 0) {
-                perror("[master] select error");
+                merror("Error in select function");
                 exit(EXIT_FAILURE);
             }
             for(int slaves=1;slaves<=slaves_dim;slaves++) {

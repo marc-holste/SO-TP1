@@ -8,6 +8,10 @@
 
 #define SLAVE_ID_MAX 20
 
+void serror (const char *err) {
+    fprintf(stderr, "[slave] %s", err);
+}
+
 void exec_minisat(char file_path[PIPE_BUF],int fd_write) {
     char slaveID[SLAVE_ID_MAX] = "";
     char *line = NULL;
@@ -27,7 +31,7 @@ void exec_minisat(char file_path[PIPE_BUF],int fd_write) {
     //execute minisat
     minisat = popen(minisat_cmd,"r");
     if(minisat == NULL) {
-        perror("[slave] minisat: error");
+        serror("Minisat: error");
         exit(EXIT_FAILURE);
     }
 
@@ -53,7 +57,7 @@ void exec_minisat(char file_path[PIPE_BUF],int fd_write) {
 //  argv[2] = fifi_write
 int main(int argc, char *argv[]) {
     if(argc < 3) {
-        perror("[slave] not enough arguments");
+        serror("Not enough arguments");
         exit(EXIT_FAILURE);
     }
     char file_paths[PIPE_BUF];
@@ -64,11 +68,11 @@ int main(int argc, char *argv[]) {
 
     //connects pipes with master
     if((fd_read = open(argv[1], O_RDONLY)) == -1){
-        perror("[slave] open fd_read error");
+        serror("Open fd_read error");
         exit(EXIT_FAILURE);
     }
     if((fd_write = open(argv[2], O_WRONLY)) == -1){
-        perror("[slave] open fd_write error");
+        serror("Open fd_write error");
         exit(EXIT_FAILURE);
     }
 
