@@ -47,17 +47,27 @@ void exec_minisat(char file_path[PIPE_BUF],int fd_write) {
     return;
 }
 
-int slave(char *fifo_read,char *fifo_write) {
+//expected arguments:
+//  argv[0] = ./bin/slave
+//  argv[1] = fifo_read
+//  argv[2] = fifi_write
+int main(int argc, char *argv[]) {
+    if(argc < 3) {
+        perror("[slave] not enough arguments");
+        exit(EXIT_FAILURE);
+    }
     char file_paths[PIPE_BUF];
     char file_path[PIPE_BUF];
     int fd_read,fd_write;
+    
+    //WARNING! Maybe we should check what the arguments are before trying to open them. 
 
     //connects pipes with master
-    if((fd_read = open(fifo_read, O_RDONLY)) == -1){
+    if((fd_read = open(argv[1], O_RDONLY)) == -1){
         perror("[slave] open fd_read error");
         exit(EXIT_FAILURE);
     }
-    if((fd_write = open(fifo_write, O_WRONLY)) == -1){
+    if((fd_write = open(argv[2], O_WRONLY)) == -1){
         perror("[slave] open fd_write error");
         exit(EXIT_FAILURE);
     }
@@ -69,7 +79,7 @@ int slave(char *fifo_read,char *fifo_write) {
     while((red = read(fd_read, file_paths, sizeof(file_paths))) > 0) {
         
         //if only one file_path was sent
-        if(strlen(file_paths)+1 == red) {
+        if(strlen(file_paths)+1 == (unsigned long int)red) {
             exec_minisat(file_paths,fd_write);
         //if more then one file_path was sent
         } else {

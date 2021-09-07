@@ -64,7 +64,7 @@ void toString(int num,char* resp){
 
         //The amount of slaves is 5% of the amount of files to process(Example is 3)
         //int slaves_dim = argc/20 + 1;
-        int slaves_dim = 3;
+        int slaves_dim = 5;
 
         //Limit the amount of slaves to max at 99
         if(slaves_dim > MAX_SLAVES) {
@@ -101,7 +101,7 @@ void toString(int num,char* resp){
             } 
             //slave
             if(pid == 0) {
-                return slave(pout_path,pin_path);
+                execl("./bin/slave","./bin/slave",pout_path,pin_path,NULL);
             }
             //master
             else {
