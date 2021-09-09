@@ -1,12 +1,17 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/masterSlave.h"
+#include "include/shared_mem.h"
 
 #define POUT_PATH "/tmp/pout"
 #define PIN_PATH "/tmp/pin"
 #define MAX_SLAVES 99
 #define MAX_SLAVES_DIGIT 3 //max amount of slaves 99 + '0' (end of string)
 #define PIPE_PATH_MAX 20
+
+#define SHM_SIZE 10000000
+#define AUX_BLOCK_PATH "./files"
+#define PROJ_ID 551699
 
 void merror (const char *err) {
     fprintf(stderr, "[master] %s", err);
@@ -77,6 +82,9 @@ void toString(int num,char* resp){
             slaves_dim = MAX_SLAVES;
         }
 
+        int shmid = create_block(AUX_BLOCK_PATH, PROJ_ID, SHM_SIZE);
+        char* shmp = attach_block(shmid);
+
         int pout_set[slaves_dim];
         int pin_set[slaves_dim];
         for(int slaves=1;slaves<=slaves_dim;slaves++) {
@@ -138,6 +146,7 @@ void toString(int num,char* resp){
         }
 
         char buffer[PIPE_BUF] = "";
+        int read_bytes = 0;
         //while there are files to process
         while(files_sent != files_processed) {
             
@@ -155,15 +164,18 @@ void toString(int num,char* resp){
             for(int slaves=1;slaves<=slaves_dim;slaves++) {
                 if(FD_ISSET(pin_set[slaves-1],&fd_set_slaves)) {
                     
-                    read(pin_set[slaves-1], buffer, sizeof(buffer));
-                    fprintf(outputfile,"%s", buffer);
+                    // read(pin_set[slaves-1], buffer, sizeof(buffer));
 
                     //Here comes shared memory
                     //Here comes shared memory
                     //Here comes shared memory
                     //Here comes shared memory
                     //Here comes shared memory
-                    
+                    read_bytes = read(pin_set[slaves-1], shmp, SHM_SIZE);
+                    memset(shmp + read_bytes, '\0', 1);
+                    fprintf(outputfile,"%s", shmp);
+                    shmp += read_bytes + 2;
+
                     files_processed++;
 
                     if(files_sent < argc-1) {                        
@@ -178,6 +190,7 @@ void toString(int num,char* resp){
             close(pin_set[slaves-1]);
         }
         fclose(outputfile);
+        detach_block(shmp);
     }
     return EXIT_SUCCESS;
 }

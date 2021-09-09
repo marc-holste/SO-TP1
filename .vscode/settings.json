@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "shared_mem.h": "c"
+        "shared_mem.h": "c",
+        "view.h": "c",
+        "semaphore.h": "c"
     }
 }

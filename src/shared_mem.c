@@ -2,9 +2,6 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <shared_mem.h>
 
-// Number used for key generation
-static int proj_id = 551699;
-
 /*
 void set_block_seed(){
     srand(time(NULL));
@@ -12,25 +9,31 @@ void set_block_seed(){
 }
 */
 
-// Returns id of created block, or -1 in case of failure
-int create_block(const char *pathname, size_t size){
-    key_t key;
-    if((key = ftok(pathname, proj_id)) == -1){
-        // Error message goes here
-        return -1;
-    }
-    return get_block(key, size);
+key_t generate_block_key(const char* pathname, int proj_id){
+    return ftok(pathname, proj_id);
 }
 
 // Returns id of block, or -1 in case of failure
-static int get_block(key_t key, size_t size){
+int get_block(key_t key, size_t size){
     return shmget(key, size, IPC_CREAT | 0666);
+}
+
+// Returns id of created block, or -1 in case of failure
+int create_block(const char *pathname, int proj_id, size_t size){
+    int block_id;
+    key_t key;
+    if((key = generate_block_key(pathname, proj_id)) == -1){
+        // Error message goes here
+        return -1;
+    }
+    block_id = get_block(key, size);
+    return block_id;
 }
 
 // Attaches a memory segment to the id sent, and returns it if the operation was succesful.
 // In case of error, a (void)* -1 is returned
 void* attach_block(int block_id){
-    return attach_custom_block(create_block, NULL, 0);
+    return attach_custom_block(block_id, NULL, 0);
 }
 
 // Attaches a memory segment to the id sent, and returns it if the operation was succesful.

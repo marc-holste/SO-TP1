@@ -1,10 +1,12 @@
 CC=gcc
 CFLAGS=-std=gnu99 -Wall -Wextra -g
+SEM_LIBS=-lpthread -lrt
 
 SOURCES_FOLDER=src
 SOURCES_MASTER=$(SOURCES_FOLDER)/master.c
 SOURCES_SLAVE=$(SOURCES_FOLDER)/slave.c
 SOURCES_VIEW=$(SOURCES_FOLDER)/view.c
+SOURCES_SHM=$(SOURCES_FOLDER)/shared_mem.c
 
 OUTPUT_FOLDER=bin
 OUTPUT_MASTER=$(OUTPUT_FOLDER)/solve
@@ -20,14 +22,14 @@ OUTPUT_FILE=out.txt
 
 all: $(OUTPUT_MASTER) $(OUTPUT_SLAVE) $(OUTPUT_VIEW)
 
-$(OUTPUT_MASTER): $(SOURCES_MASTER)
-	$(CC) $(CFLAGS) $^ -o $@
+$(OUTPUT_MASTER): $(SOURCES_SHM) $(SOURCES_MASTER)
+	$(CC) $(CFLAGS) -Isrc/include $^ -o $@ $(SEM_LIBS)
 
 $(OUTPUT_SLAVE): $(SOURCES_SLAVE)
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(OUTPUT_VIEW): $(SOURCES_VIEW)
-	$(CC) $(CFLAGS) $^ -o $@
+$(OUTPUT_VIEW): $(SOURCES_SHM) $(SOURCES_VIEW)
+	$(CC) $(CFLAGS) -Isrc/include $^ -o $@ $(SEM_LIBS)
 
 compile: all
 
@@ -59,7 +61,8 @@ test:
 	mkdir -p $(TEST_FOLDER)/valgrind;
 	mkdir -p $(TEST_FOLDER)/cppcheck;
 	mkdir -p $(TEST_FOLDER)/pvs-studio;
-	valgrind --log-file="$(TEST_FOLDER)/valgrind/valgrind-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
+	valgrind --log-file="$(TEST_FOLDER)/valgrind/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
+	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 11;
 	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(TEST_FOLDER)/cppcheck/cppcheck-report.txt
 
 .PHONY: all compile install clean delete run test

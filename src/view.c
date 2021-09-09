@@ -5,6 +5,10 @@
 
 #define MAX_NUM_LEN 10
 
+#define SHM_SIZE 10000000
+#define AUX_BLOCK_PATH "./files"
+#define PROJ_ID 551699
+
 void verror (const char *err) {
     fprintf(stderr, "[view] %s", err);
 }
@@ -12,6 +16,7 @@ void verror (const char *err) {
 int main (int argc, char *argv[]) {
     //Here comes view
     int in = 0;
+    int printed = 0;
     if (isatty(fileno(stdin))) { //caso consola
         if (argc != 2){
             verror ("Missing file count parameter\n");
@@ -29,6 +34,14 @@ int main (int argc, char *argv[]) {
 
         //el resto de las cosas
         printf("%d\n", in);
+        int shmid = get_block(generate_block_key(AUX_BLOCK_PATH, PROJ_ID), SHM_SIZE); //get_last_created_id();
+        char* shmp = attach_block(shmid);
+        while(printed < in){
+            shmp += printf("%s", shmp) + 3;
+            printed++;
+        }
+        detach_block(shmp);
+        delete_block(shmid);
     }
     return 0;
 }
