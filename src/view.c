@@ -33,11 +33,11 @@ int main (int argc, char *argv[]) {
     if (in > 0){
 
         //el resto de las cosas
-        printf("%d\n", in);
+        // printf("%d\n", in);
         int shmid = get_block(generate_block_key(AUX_BLOCK_PATH, PROJ_ID), SHM_SIZE); //get_last_created_id();
         char* shmp = attach_block(shmid);
         while(printed < in){
-            shmp += printf("%s", shmp) + 3;
+            shmp += printf("%s", shmp) + 2;
             printed++;
         }
         detach_block(shmp);

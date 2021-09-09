@@ -172,9 +172,8 @@ void toString(int num,char* resp){
                     //Here comes shared memory
                     //Here comes shared memory
                     read_bytes = read(pin_set[slaves-1], shmp, SHM_SIZE);
-                    memset(shmp + read_bytes, '\0', 1);
                     fprintf(outputfile,"%s", shmp);
-                    shmp += read_bytes + 2;
+                    shmp += read_bytes + 1;
 
                     files_processed++;
 
