@@ -9,9 +9,9 @@
 #define MAX_SLAVES_DIGIT 3 //max amount of slaves 99 + '0' (end of string)
 #define PIPE_PATH_MAX 20
 
-#define SHM_SIZE 10000000
-#define AUX_BLOCK_PATH "./files"
+#define SHM_SIZE 1048576
 #define PROJ_ID 551699
+#define AUX_BLOCK_PATH "./files"
 
 void merror (const char *err) {
     fprintf(stderr, "[master] %s", err);
@@ -63,8 +63,11 @@ void toString(int num,char* resp){
         exit(EXIT_FAILURE);
     } else {
 
+        int shmid = create_block(AUX_BLOCK_PATH, PROJ_ID, SHM_SIZE);
+        char* shmp = attach_block(shmid);
+
         //the amount of files to process. Data for view
-        printf("%d\n",argc-1);
+        printf("%d %d\n",argc-1, shmid);
 
         //creates outputfile
         FILE *outputfile = fopen(OUTPUT_NAME,"w");
@@ -81,9 +84,6 @@ void toString(int num,char* resp){
         if(slaves_dim > MAX_SLAVES) {
             slaves_dim = MAX_SLAVES;
         }
-
-        int shmid = create_block(AUX_BLOCK_PATH, PROJ_ID, SHM_SIZE);
-        char* shmp = attach_block(shmid);
 
         int pout_set[slaves_dim];
         int pin_set[slaves_dim];
@@ -145,7 +145,7 @@ void toString(int num,char* resp){
             files_sent++; 
         }
 
-        char buffer[PIPE_BUF] = "";
+//        char buffer[PIPE_BUF] = "";
         int read_bytes = 0;
         //while there are files to process
         while(files_sent != files_processed) {
@@ -191,5 +191,8 @@ void toString(int num,char* resp){
         fclose(outputfile);
         detach_block(shmp);
     }
+
+
+
     return EXIT_SUCCESS;
 }
