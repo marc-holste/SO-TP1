@@ -2,6 +2,10 @@
     "files.associations": {
         "shared_mem.h": "c",
         "view.h": "c",
-        "semaphore.h": "c"
-    }
+        "semaphore.h": "c",
+        "types.h": "c",
+        "pthread.h": "c",
+        "sem_manager.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
 }
