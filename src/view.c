@@ -37,7 +37,7 @@ int main (int argc, char *argv[]) {
     if (inNum > -1 && inId > -1){
 
         char* shmp = attach_block(inId);
-        sem_t* semaphore = get_semaphore(SEM_NAME, 0);
+        sem_t* semaphore = get_semaphore(SEM_NAME);
 
         if ((long)shmp == -1){
             verror ("Shared memory is not accesible\n");
@@ -45,8 +45,8 @@ int main (int argc, char *argv[]) {
         }
         while(printed < inNum){
             wait_semaphore(semaphore);
+            printf("Resuelvo el #%d\n", printed+1);
             shmp += printf("%s", shmp) + 2;
-            signal_semaphore(semaphore);
             printed++;
         }
         detach_block(shmp);

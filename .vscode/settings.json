@@ -5,7 +5,8 @@
         "semaphore.h": "c",
         "types.h": "c",
         "pthread.h": "c",
-        "sem_manager.h": "c"
+        "sem_manager.h": "c",
+        "fcntl.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

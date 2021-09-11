@@ -63,7 +63,7 @@ test:
 	mkdir -p $(TEST_FOLDER)/cppcheck;
 	mkdir -p $(TEST_FOLDER)/pvs-studio;
 	valgrind --log-file="$(TEST_FOLDER)/valgrind/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
-	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 11;
+	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 14;
 	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(TEST_FOLDER)/cppcheck/cppcheck-report.txt
 
 .PHONY: all compile install clean delete run test

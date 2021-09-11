@@ -5,8 +5,8 @@ sem_t* create_semaphore(const char* sem_name, unsigned int value, mode_t mode){
     return sem_open(sem_name, O_CREAT, mode, value);
 }
 
-sem_t* get_semaphore(const char* sem_name, unsigned int value){
-    return sem_open(sem_name, value);
+sem_t* get_semaphore(const char* sem_name){
+    return sem_open(sem_name, 0);
 }
 
 int get_semaphore_value(sem_t* semaphore, int* pvalue){

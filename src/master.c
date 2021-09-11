@@ -66,7 +66,7 @@ void toString(int num,char* resp){
         int shmid = create_block(AUX_BLOCK_PATH, PROJ_ID, SHM_SIZE);
         char* shmp = attach_block(shmid);
 
-        sem_t* semaphore = create_semaphore(SEM_NAME, 1, SEM_MODE);
+        sem_t* semaphore = create_semaphore(SEM_NAME, 0, SEM_MODE);
 
         //the amount of files to process. Data for view
         printf("%d %d\n",argc-1, shmid);
@@ -173,7 +173,6 @@ void toString(int num,char* resp){
                     //Here comes shared memory
                     //Here comes shared memory
                     //Here comes shared memory
-                    wait_semaphore(semaphore);
                     read_bytes = read(pin_set[slaves-1], shmp, SHM_SIZE);
                     fprintf(outputfile,"%s", shmp);
                     signal_semaphore(semaphore);
