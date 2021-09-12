@@ -22,9 +22,8 @@ int get_block(key_t key, size_t size){
 int create_block(const char *pathname, int proj_id, size_t size){
     int block_id;
     key_t key;
-    if((key = generate_block_key(pathname, proj_id)) == -1){
-        // Error message goes here
-        return -1;
+    if((key = generate_block_key(pathname, proj_id)) == -1){    
+        return -1;                                              // On error, ftok returns -1
     }
     block_id = get_block(key, size);
     return block_id;

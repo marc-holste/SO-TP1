@@ -17,10 +17,11 @@ int main (int argc, char *argv[]) {
     int inNum = -1;
     int inId = -1;
     int printed = 0;
+    size_t auxP = 0;
 
     if (isatty(fileno(stdin))) { //caso consola
         if (argc != 3){
-            verror ("Missing file count parameter\n");
+            verror((argc > 3)?"Too many arguments\n":"Too few arguments\n");
             return -1;
         } else {
             inNum = atoi(argv[1]);
@@ -35,25 +36,44 @@ int main (int argc, char *argv[]) {
         }
     }
     if (inNum > -1 && inId > -1){
-
         char* shmp = attach_block(inId);
-        if ((long)shmp == -1){
-            verror ("Shared memory is not accesible\n");
-            return -1;
+        if ((long long)shmp == -1){
+            perror("[view] attach_block");
+            return EXIT_FAILURE;
         }
+
         sem_t* semaphore = sem_open(SEM_NAME, 0);       // Semaphore should be previously created by master
+        if(semaphore == SEM_FAILED){
+            perror("[view] sem_open");
+            return EXIT_FAILURE;
+        }
         
         while(printed < inNum){
-            sem_wait(semaphore);
-            shmp += printf("%s", shmp) + 2;             // Adds 2 bc of '\0' and '\n'
+            if(sem_wait(semaphore) == -1){
+                perror("[view] sem_wait");
+                return EXIT_FAILURE;
+            }
+            auxP += printf("%s", shmp+auxP) + 2;             // Adds 2 bc of '\0' and '\n'
             printed++;
         }
 
         // Deletes shared memory and semaphore used, bc by now master already finished processing all files.
-        detach_block(shmp);
-        delete_block(inId);
-        sem_close(semaphore);
-        sem_unlink(SEM_NAME);
+        if(detach_block(shmp) == -1){
+            perror("[view] detach_block");
+            return EXIT_FAILURE;
+        }
+        if(delete_block(inId) == -1){
+            perror("[view] delete_block");
+            return EXIT_FAILURE;
+        }
+        if(sem_close(semaphore) == -1){
+            perror("[view] sem_close");
+            return EXIT_FAILURE;
+        }
+        if(sem_unlink(SEM_NAME) == -1){
+            perror("[view] sem_unlink");
+            return EXIT_FAILURE;
+        }
     }
-    return 0;
+    return EXIT_SUCCESS;
 }

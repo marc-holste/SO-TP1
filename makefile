@@ -14,7 +14,7 @@ OUTPUT_SLAVE=$(OUTPUT_FOLDER)/slave
 OUTPUT_VIEW=$(OUTPUT_FOLDER)/view
 
 TEST_FOLDER=test
-INCLUDE_FOLDER=src/include
+INCLUDE_FOLDER=$(SOURCES_FOLDER)/include
 
 PVS_LIC_PATH=../.config/PVS-Studio/PVS-Studio.lic
 
@@ -63,7 +63,7 @@ test:
 	mkdir -p $(TEST_FOLDER)/cppcheck;
 	mkdir -p $(TEST_FOLDER)/pvs-studio;
 	valgrind --log-file="$(TEST_FOLDER)/valgrind/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
-	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 14 4;
+	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 13 0;
 	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(TEST_FOLDER)/cppcheck/cppcheck-report.txt
 
 .PHONY: all compile install clean delete run test

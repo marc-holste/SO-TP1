@@ -64,11 +64,29 @@ void toString(int num,char* resp){
     } else {
 
         int shmid = create_block(AUX_BLOCK_PATH, PROJ_ID, SHM_SIZE);
-        char* shmp = attach_block(shmid);
+        if(shmid == -1){
+            perror("[master] create_block");
+            return EXIT_FAILURE;
+        }
 
-        // Creates semaphore, deleting any other with the same name
-        sem_unlink(SEM_NAME);
+        char* shmp = attach_block(shmid);
+        if((long long)shmp == -1){
+            perror("[master] attach_block");
+            return EXIT_FAILURE;
+        }
+        size_t auxP = 0;                        // Used to change the direction pointed by shmp without altering its value
+
+        // Creates semaphore, deleting any other with the same name, unless the user doesn´t have access to it
+        if(sem_unlink(SEM_NAME) == -1 && errno == EACCES){
+            perror("[master] sem_unlink");
+            return EXIT_FAILURE;
+        }
+
         sem_t* semaphore = sem_open(SEM_NAME, O_CREAT, SEM_MODE, 0);
+        if(semaphore == SEM_FAILED){
+            perror("[master] sem_open");
+            return EXIT_FAILURE;
+        }
 
         //the amount of files to process. Data for view
         printf("%d %d\n",argc-1, shmid);
@@ -161,8 +179,8 @@ void toString(int num,char* resp){
             }
 
             //waits until a slave finishes
-            if(select(maxfd+1,&fd_set_slaves,NULL,NULL,NULL) < 0) {
-                merror("Error in select function");
+            if(select(maxfd+1,&fd_set_slaves,NULL,NULL,NULL) == -1) {
+                perror("[master] select");
                 exit(EXIT_FAILURE);
             }
             for(int slaves=1;slaves<=slaves_dim;slaves++) {
@@ -175,11 +193,18 @@ void toString(int num,char* resp){
                     //Here comes shared memory
                     //Here comes shared memory
                     //Here comes shared memory
-                    read_bytes = read(pin_set[slaves-1], shmp, SHM_SIZE);
-                    fprintf(outputfile,"%s", shmp);
-                    sem_post(semaphore);
+                    read_bytes = read(pin_set[slaves-1], shmp+auxP, SHM_SIZE);
+                    if(read_bytes == -1){
+                        perror("[master] read");
+                        return EXIT_FAILURE;
+                    }
 
-                    shmp += read_bytes + 1;
+                    fprintf(outputfile,"%s", shmp+auxP);
+                    if(sem_post(semaphore) == -1){
+                        perror("[master] sem_post");
+                        return EXIT_FAILURE;
+                    }
+                    auxP += read_bytes + 1;
                     files_processed++;
 
                     if(files_sent < argc-1) {                        
@@ -196,8 +221,14 @@ void toString(int num,char* resp){
         fclose(outputfile);
 
         // Only detaches shared memory and closes semaphore instead of deleting both as view still needs them.
-        detach_block(shmp);
-        sem_close(semaphore);     
+        if(detach_block(shmp) == -1){
+            perror("[master] detach_block");
+            return EXIT_FAILURE;
+        }
+        if(sem_close(semaphore) == -1){
+            perror("[master] sem_close");
+            return EXIT_FAILURE;
+        }
     }
 
     return EXIT_SUCCESS;

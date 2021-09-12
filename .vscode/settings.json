@@ -11,7 +11,8 @@
         "limits.h": "c",
         "syslimits.h": "c",
         "signal.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "stdlib.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }
