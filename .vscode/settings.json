@@ -6,7 +6,12 @@
         "types.h": "c",
         "pthread.h": "c",
         "sem_manager.h": "c",
-        "fcntl.h": "c"
+        "fcntl.h": "c",
+        "masterslave.h": "c",
+        "limits.h": "c",
+        "syslimits.h": "c",
+        "signal.h": "c",
+        "time.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

@@ -7,7 +7,6 @@ SOURCES_MASTER=$(SOURCES_FOLDER)/master.c
 SOURCES_SLAVE=$(SOURCES_FOLDER)/slave.c
 SOURCES_VIEW=$(SOURCES_FOLDER)/view.c
 SOURCES_SHM=$(SOURCES_FOLDER)/shared_mem.c
-SOURCES_SEM=$(SOURCES_FOLDER)/sem_manager.c
 
 OUTPUT_FOLDER=bin
 OUTPUT_MASTER=$(OUTPUT_FOLDER)/solve
@@ -15,6 +14,7 @@ OUTPUT_SLAVE=$(OUTPUT_FOLDER)/slave
 OUTPUT_VIEW=$(OUTPUT_FOLDER)/view
 
 TEST_FOLDER=test
+INCLUDE_FOLDER=src/include
 
 PVS_LIC_PATH=../.config/PVS-Studio/PVS-Studio.lic
 
@@ -23,14 +23,14 @@ OUTPUT_FILE=out.txt
 
 all: $(OUTPUT_MASTER) $(OUTPUT_SLAVE) $(OUTPUT_VIEW)
 
-$(OUTPUT_MASTER): $(SOURCES_MASTER) $(SOURCES_SHM) $(SOURCES_SEM)
-	$(CC) $(CFLAGS) -Isrc/include $^ -o $@ $(SEM_LIBS)
+$(OUTPUT_MASTER): $(SOURCES_MASTER) $(SOURCES_SHM)
+	$(CC) $(CFLAGS) -I$(INCLUDE_FOLDER) $^ -o $@ $(SEM_LIBS)
 
 $(OUTPUT_SLAVE): $(SOURCES_SLAVE)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) -I$(INCLUDE_FOLDER) $^ -o $@
 
-$(OUTPUT_VIEW): $(SOURCES_VIEW) $(SOURCES_SHM) $(SOURCES_SEM)
-	$(CC) $(CFLAGS) -Isrc/include $^ -o $@ $(SEM_LIBS)
+$(OUTPUT_VIEW): $(SOURCES_VIEW) $(SOURCES_SHM)
+	$(CC) $(CFLAGS) -I$(INCLUDE_FOLDER) $^ -o $@ $(SEM_LIBS)
 
 compile: all
 
@@ -63,7 +63,7 @@ test:
 	mkdir -p $(TEST_FOLDER)/cppcheck;
 	mkdir -p $(TEST_FOLDER)/pvs-studio;
 	valgrind --log-file="$(TEST_FOLDER)/valgrind/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
-	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 14;
+	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 14 4;
 	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(TEST_FOLDER)/cppcheck/cppcheck-report.txt
 
 .PHONY: all compile install clean delete run test

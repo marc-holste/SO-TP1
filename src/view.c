@@ -37,22 +37,23 @@ int main (int argc, char *argv[]) {
     if (inNum > -1 && inId > -1){
 
         char* shmp = attach_block(inId);
-        sem_t* semaphore = get_semaphore(SEM_NAME);
-
         if ((long)shmp == -1){
             verror ("Shared memory is not accesible\n");
             return -1;
         }
+        sem_t* semaphore = sem_open(SEM_NAME, 0);       // Semaphore should be previously created by master
+        
         while(printed < inNum){
-            wait_semaphore(semaphore);
-            printf("Resuelvo el #%d\n", printed+1);
-            shmp += printf("%s", shmp) + 2;
+            sem_wait(semaphore);
+            shmp += printf("%s", shmp) + 2;             // Adds 2 bc of '\0' and '\n'
             printed++;
         }
+
+        // Deletes shared memory and semaphore used, bc by now master already finished processing all files.
         detach_block(shmp);
         delete_block(inId);
-        close_semaphore(semaphore);
-        delete_semaphore(SEM_NAME);
+        sem_close(semaphore);
+        sem_unlink(SEM_NAME);
     }
     return 0;
 }

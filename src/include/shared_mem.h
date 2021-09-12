@@ -1,9 +1,7 @@
-#include <sys/types.h>
 #include <sys/ipc.h>
+#include <sys/types.h>
 #include <sys/shm.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 key_t generate_block_key(const char* pathname, int proj_id);
 int create_block(const char *pathname, int proj_id, size_t size);
