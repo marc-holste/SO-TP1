@@ -42,14 +42,14 @@ int main (int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
 
-        sem_t* semaphore = sem_open(SEM_NAME, 0);       // Semaphore should be previously created by master
-        if(semaphore == SEM_FAILED){
-            perror("[view] sem_open");
+        sem_t* semaphore_count = sem_open(COUNT_SEM_NAME, 0);       // Semaphore should be previously created by master
+        if(semaphore_count == SEM_FAILED){
+            perror("[view] couldn't open count semaphore");
             return EXIT_FAILURE;
         }
         
         while(printed < inNum){
-            if(sem_wait(semaphore) == -1){
+            if(sem_wait(semaphore_count) == -1){
                 perror("[view] sem_wait");
                 return EXIT_FAILURE;
             }
@@ -66,11 +66,11 @@ int main (int argc, char *argv[]) {
             perror("[view] delete_block");
             return EXIT_FAILURE;
         }
-        if(sem_close(semaphore) == -1){
+        if(sem_close(semaphore_count) == -1){
             perror("[view] sem_close");
             return EXIT_FAILURE;
         }
-        if(sem_unlink(SEM_NAME) == -1){
+        if(sem_unlink(COUNT_SEM_NAME) == -1){
             perror("[view] sem_unlink");
             return EXIT_FAILURE;
         }

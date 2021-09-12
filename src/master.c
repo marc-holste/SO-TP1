@@ -77,12 +77,12 @@ void toString(int num,char* resp){
         size_t auxP = 0;                        // Used to change the direction pointed by shmp without altering its value
 
         // Creates semaphore, deleting any other with the same name, unless the user doesn´t have access to it
-        if(sem_unlink(SEM_NAME) == -1 && errno == EACCES){
+        if(sem_unlink(COUNT_SEM_NAME) == -1 && errno == EACCES){
             perror("[master] sem_unlink");
             return EXIT_FAILURE;
         }
 
-        sem_t* semaphore = sem_open(SEM_NAME, O_CREAT, SEM_MODE, 0);
+        sem_t* semaphore = sem_open(COUNT_SEM_NAME, O_CREAT, SEM_MODE, 0);
         if(semaphore == SEM_FAILED){
             perror("[master] sem_open");
             return EXIT_FAILURE;
