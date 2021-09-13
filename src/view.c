@@ -6,8 +6,6 @@
 
 #define MAX_NUM_LEN 10
 
-#define PROJ_ID 551699
-
 void verror (const char *err) {
     fprintf(stderr, "[view] %s", err);
 }
@@ -15,28 +13,31 @@ void verror (const char *err) {
 int main (int argc, char *argv[]) {
     //Here comes view
     int inNum = -1;
-    int inId = -1;
     int printed = 0;
     size_t auxP = 0;
 
     if (isatty(fileno(stdin))) { //caso consola
-        if (argc != 3){
-            verror((argc > 3)?"Too many arguments\n":"Too few arguments\n");
+        if (argc != 2){
+            verror((argc > 2)?"Too many arguments\n":"Missing file count\n");
             return -1;
         } else {
             inNum = atoi(argv[1]);
-            inId = atoi(argv[2]);
         }
     } else { //caso pipe
         if (argc != 1){
             verror ("Error in pipe, missing count\n");
             return -1;
         } else {
-            scanf("%d %d", &inNum, &inId);
+            scanf("%d", &inNum);
         }
     }
-    if (inNum > -1 && inId > -1){
-        char* shmp = attach_block(inId);
+    if (inNum > -1){
+        int shmid;
+        if((shmid = get_block(0666)) == -1){
+            perror("[view] get_block");
+            return EXIT_FAILURE;
+        }
+        char* shmp = attach_block(shmid);
         if ((long long)shmp == -1){
             perror("[view] attach_block");
             return EXIT_FAILURE;
@@ -62,7 +63,7 @@ int main (int argc, char *argv[]) {
             perror("[view] detach_block");
             return EXIT_FAILURE;
         }
-        if(delete_block(inId) == -1){
+        if(delete_block(shmid) == -1){
             perror("[view] delete_block");
             return EXIT_FAILURE;
         }

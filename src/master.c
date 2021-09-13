@@ -9,9 +9,8 @@
 #define MAX_SLAVES_DIGIT 3 //max amount of slaves 99 + '0' (end of string)
 #define PIPE_PATH_MAX 20
 
-#define SHM_SIZE 1048576
-#define PROJ_ID 551699
-#define AUX_BLOCK_PATH "./files"
+#define SHM_SIZE            1048576            // 1MB block size
+#define PERMISSION_FLAGS    0666               // Could also or all predefined permission flags, but less practical
 
 void merror (const char *err) {
     fprintf(stderr, "[master] %s", err);
@@ -63,7 +62,7 @@ void toString(int num,char* resp){
         exit(EXIT_FAILURE);
     } else {
 
-        int shmid = create_block(AUX_BLOCK_PATH, PROJ_ID, SHM_SIZE);
+        int shmid = create_block(SHM_SIZE, PERMISSION_FLAGS);
         if(shmid == -1){
             perror("[master] create_block");
             return EXIT_FAILURE;
@@ -89,7 +88,7 @@ void toString(int num,char* resp){
         }
 
         //the amount of files to process. Data for view
-        printf("%d %d\n",argc-1, shmid);
+        printf("%d\n",argc-1);
 
         //creates outputfile
         FILE *outputfile = fopen(OUTPUT_NAME,"w");

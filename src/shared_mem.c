@@ -2,43 +2,32 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <shared_mem.h>
 
-/*
-void set_block_seed(){
-    srand(time(NULL));
-    proj_id = rand();       // RAND_MAX = INT_MAX
-}
-*/
+#define PATH "./files"
+#define SEED 188033
 
-key_t generate_block_key(const char* pathname, int proj_id){
-    return ftok(pathname, proj_id);
-}
-
-// Returns id of block, or -1 in case of failure
-int get_block(key_t key, size_t size){
-    return shmget(key, size, IPC_CREAT | 0666);
+static key_t generate_block_key(){
+    return ftok(PATH, SEED);
 }
 
 // Returns id of created block, or -1 in case of failure
-int create_block(const char *pathname, int proj_id, size_t size){
-    int block_id;
+int create_block(size_t size, int permissions){
     key_t key;
-    if((key = generate_block_key(pathname, proj_id)) == -1){    
-        return -1;                                              // On error, ftok returns -1
+    if((key = generate_block_key()) == -1){    
+        return -1;                                  // On error, ftok returns -1
     }
-    block_id = get_block(key, size);
-    return block_id;
+    return shmget(key, size, IPC_CREAT | permissions);
+}
+
+// Returns id of block, or -1 in case of failure
+// As block was previously created, it's not necessary to send block_size
+int get_block(int permissions){
+    return shmget(generate_block_key(), 0, permissions);
 }
 
 // Attaches a memory segment to the id sent, and returns it if the operation was succesful.
 // In case of error, a (void)* -1 is returned
 void* attach_block(int block_id){
-    return attach_custom_block(block_id, NULL, 0);
-}
-
-// Attaches a memory segment to the id sent, and returns it if the operation was succesful.
-// In case of error, a (void*)-1 is returned
-void* attach_custom_block(int block_id, const void* block_addr, int block_flags){
-    return shmat(block_id, block_addr, block_flags);
+    return shmat(block_id, NULL, 0);
 }
 
 // Detaches memory block. Returns 0 in case of success, and -1 if an error ocurred
