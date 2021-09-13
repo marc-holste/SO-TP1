@@ -1,5 +1,6 @@
 # Output and executables (on bin folder)
 bin/*
+test/*
 *.txt
 
 # Object files

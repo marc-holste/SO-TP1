@@ -18,6 +18,7 @@ TEST_FOLDER=test
 INCLUDE_FOLDER=$(SOURCES_FOLDER)/include
 
 PVS_LIC_PATH=../.config/PVS-Studio/PVS-Studio.lic
+PVS_OUT_FOLDER=test/pvs-studio
 
 INPUT_FILES=files/*
 OUTPUT_FILE=out.txt
@@ -47,16 +48,19 @@ delete:
 run:
 	rm -rf $(OUTPUT_FILE); $(OUTPUT_MASTER) $(INPUT_FILES)
 
-# TODO: Add pvs-studio analysis to make test
 # ---------------------------------------------------------------------------------------------------------------------------------
-# EXTRA: To install license for PVS-Studio, do:
+# To install license for PVS-Studio, do:
+# apt-get update
+# apt-get install pvs-studio
 # pvs-studio-analyzer credentials "PVS-Studio Free" "FREE-FREE-FREE-FREE"
 # ---------------------------------------------------------------------------------------------------------------------------------
-# rm -rf $(OUTPUT_FOLDER)/* $(OUTPUT_FILE) test/*
-# pvs-studio-analyzer trace -- make;
-# pvs-studio-analyzer analyze --compiler $(CC) -j2 -l $(PVS_LIC_PATH) -o test/pvs-studio/PVS-Studio.log;
-# plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o test/pvs-studio/report.tasks test/pvs-studio/PVS-Studio.log;
-# ---------------------------------------------------------------------------------------------------------------------------------
+pvs-studio:
+	mkdir -p $(PVS_OUT_FOLDER)/
+	make clean
+	pvs-studio-analyzer trace -- make
+	pvs-studio-analyzer analyze --compiler $(CC) -j2 -o test/pvs-studio/PVS-Studio.log
+	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o test/pvs-studio/report.tasks test/pvs-studio/PVS-Studio.log
+	mv strace_out test/pvs-studio/strace_out
 
 test:
 	mkdir -p $(TEST_FOLDER);
