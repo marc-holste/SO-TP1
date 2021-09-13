@@ -17,6 +17,8 @@ OUTPUT_VIEW=$(OUTPUT_FOLDER)/view
 TEST_FOLDER=test
 INCLUDE_FOLDER=$(SOURCES_FOLDER)/include
 
+VALGRIND_OUT_FOLDER=$(TEST_FOLDER)/valgrind
+CPP_OUT_FOLDER=$(TEST_FOLDER)/cppcheck
 PVS_LIC_PATH=../.config/PVS-Studio/PVS-Studio.lic
 PVS_OUT_FOLDER=$(TEST_FOLDER)/pvs-studio
 
@@ -54,21 +56,26 @@ run:
 # apt-get install pvs-studio
 # pvs-studio-analyzer credentials "PVS-Studio Free" "FREE-FREE-FREE-FREE"
 # ---------------------------------------------------------------------------------------------------------------------------------
-pvs-studio:
-	mkdir -p $(PVS_OUT_FOLDER)/
+test-pvs-studio:
+	mkdir -p $(PVS_OUT_FOLDER);
 	make clean
 	pvs-studio-analyzer trace -- make
 	pvs-studio-analyzer analyze --compiler $(CC) -j2 -o $(PVS_OUT_FOLDER)/PVS-Studio.log
 	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o $(PVS_OUT_FOLDER)/report.tasks $(PVS_OUT_FOLDER)/PVS-Studio.log
 	mv strace_out $(PVS_OUT_FOLDER)/strace_out
 
+test-cpp-check:
+	mkdir -p $(CPP_OUT_FOLDER);
+	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(CPP_OUT_FOLDER)/cppcheck-report.txt
+
+test-valgrind:
+	mkdir -p $(VALGRIND_OUT_FOLDER);
+	valgrind --log-file="$(VALGRIND_OUT_FOLDER)/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
+	valgrind --log-file="$(VALGRIND_OUT_FOLDER)/view-report.txt" $(OUTPUT_VIEW) 13;
+
 test:
-	mkdir -p $(TEST_FOLDER);
-	mkdir -p $(TEST_FOLDER)/valgrind;
-	mkdir -p $(TEST_FOLDER)/cppcheck;
-	mkdir -p $(TEST_FOLDER)/pvs-studio;
-	valgrind --log-file="$(TEST_FOLDER)/valgrind/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
-	valgrind --log-file="$(TEST_FOLDER)/valgrind/view-report.txt" $(OUTPUT_VIEW) 13;
-	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(TEST_FOLDER)/cppcheck/cppcheck-report.txt
+	make test-pvs-studio
+	make test-valgrind
+	make test-cpp-check
 
 .PHONY: all compile install clean delete run test
