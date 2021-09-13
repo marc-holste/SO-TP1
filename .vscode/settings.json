@@ -17,7 +17,8 @@
         "shm.h": "c",
         "errno.h": "c",
         "errno-base.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "stdio.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

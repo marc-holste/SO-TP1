@@ -13,8 +13,6 @@ void verror (const char *err) {
 int main (int argc, char *argv[]) {
     //Here comes view
     int inNum = -1;
-    int printed = 0;
-    size_t auxP = 0;
 
     if (isatty(fileno(stdin))) { //caso consola
         if (argc != 2){
@@ -28,20 +26,25 @@ int main (int argc, char *argv[]) {
             verror ("Error in pipe, missing count\n");
             return -1;
         } else {
-            scanf("%d", &inNum);
-        }
+            scanf("%10d", &inNum);          // An integer can´t have more than 10 digits
+        }                                   // Used to prevent possible crashes with huge input of data
     }
     if (inNum > -1){
+        int printed = 0;
+        char* shmp;
+
         int shmid;
         if((shmid = get_block(0666)) == -1){
             perror("[view] get_block");
             return EXIT_FAILURE;
         }
-        char* shmp = attach_block(shmid);
-        if ((long long)shmp == -1){
+
+        char* shm_base = attach_block(shmid);
+        if ((long long)shm_base == -1){
             perror("[view] attach_block");
             return EXIT_FAILURE;
         }
+        shmp = shm_base;
 
         sem_t* semaphore_count = sem_open(COUNT_SEM_NAME, 0);       // Semaphore should be previously created by master
         if(semaphore_count == SEM_FAILED){
@@ -54,12 +57,12 @@ int main (int argc, char *argv[]) {
                 perror("[view] sem_wait");
                 return EXIT_FAILURE;
             }
-            auxP += printf("%s", shmp+auxP) + 2;             // Adds 2 bc of '\0' and '\n'
+            shmp += printf("%s", shmp) + 2;             // Adds 2 bc of '\0' and '\n'
             printed++;
         }
 
         // Deletes shared memory and semaphore used, bc by now master already finished processing all files.
-        if(detach_block(shmp) == -1){
+        if(detach_block(shm_base) == -1){
             perror("[view] detach_block");
             return EXIT_FAILURE;
         }

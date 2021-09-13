@@ -32,7 +32,7 @@ int max_fd(int fd_slaves[],int dim) {
 
 void toString(int num,char* resp){
 	int digit=0;
-	char aux;
+
     if(num!=0){
         // Builds the number in the array
 		while(num!=0){
@@ -40,8 +40,9 @@ void toString(int num,char* resp){
 			num=num/10;
 			digit++;
 		}
+        
         //inverts the number order
-		for(int i=0;i<digit/2;i++){
+		for(int i=0, aux;i<digit/2;i++){
 			aux=resp[i];
 			resp[i]=resp[digit-i-1];
 			resp[digit-i-1]=aux;
@@ -68,12 +69,12 @@ void toString(int num,char* resp){
             return EXIT_FAILURE;
         }
 
-        char* shmp = attach_block(shmid);
-        if((long long)shmp == -1){
+        char* shm_base = attach_block(shmid);
+        if((long long)shm_base == -1){
             perror("[master] attach_block");
             return EXIT_FAILURE;
         }
-        size_t auxP = 0;                        // Used to change the direction pointed by shmp without altering its value
+        char* shmp = shm_base;                        // Used to change the direction pointed by shmp without altering its value
 
         // Creates semaphore, deleting any other with the same name, unless the user doesn´t have access to it
         if(sem_unlink(COUNT_SEM_NAME) == -1 && errno == EACCES){
@@ -165,9 +166,10 @@ void toString(int num,char* resp){
             write(pout_set[slaves-1],argv[files_sent+1],strlen(argv[files_sent+1])+1);
             files_sent++; 
         }
-
-//        char buffer[PIPE_BUF] = "";
+        
         int read_bytes = 0;
+        const size_t data_size = (SHM_SIZE / argc-1);         // MAX size of each block sent to view
+        
         //while there are files to process
         while(files_sent != files_processed) {
             
@@ -184,26 +186,21 @@ void toString(int num,char* resp){
             }
             for(int slaves=1;slaves<=slaves_dim;slaves++) {
                 if(FD_ISSET(pin_set[slaves-1],&fd_set_slaves)) {
-                    
-                    // read(pin_set[slaves-1], buffer, sizeof(buffer));
 
-                    //Here comes shared memory
-                    //Here comes shared memory
-                    //Here comes shared memory
-                    //Here comes shared memory
-                    //Here comes shared memory
-                    read_bytes = read(pin_set[slaves-1], shmp+auxP, SHM_SIZE);
+                    read_bytes = read(pin_set[slaves-1], shmp, data_size);
                     if(read_bytes == -1){
                         perror("[master] read");
+                        fclose(outputfile);
                         return EXIT_FAILURE;
                     }
 
-                    fprintf(outputfile,"%s", shmp+auxP);
+                    fprintf(outputfile,"%s", shmp);
                     if(sem_post(semaphore) == -1){
                         perror("[master] sem_post");
+                        fclose(outputfile);
                         return EXIT_FAILURE;
                     }
-                    auxP += read_bytes + 1;
+                    shmp += read_bytes + 1;
                     files_processed++;
 
                     if(files_sent < argc-1) {                        
@@ -220,7 +217,7 @@ void toString(int num,char* resp){
         fclose(outputfile);
 
         // Only detaches shared memory and closes semaphore instead of deleting both as view still needs them.
-        if(detach_block(shmp) == -1){
+        if(detach_block(shm_base) == -1){
             perror("[master] detach_block");
             return EXIT_FAILURE;
         }
