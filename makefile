@@ -74,7 +74,7 @@ test-valgrind:
 	valgrind --log-file="$(VALGRIND_OUT_FOLDER)/view-report.txt" $(OUTPUT_VIEW) 13;
 
 test:
-	make test-pvs-studio
+#make test-pvs-studio
 	make test-cppcheck
 	make test-valgrind
 

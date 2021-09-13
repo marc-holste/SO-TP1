@@ -5,6 +5,7 @@
 #include "include/sem_manager.h"
 
 #define MAX_NUM_LEN 10
+#define PERMISSION_FLAGS    0666               // Could also or all predefined permission flags, but less practical
 
 void verror (const char *err) {
     fprintf(stderr, "[view] %s", err);
@@ -34,7 +35,7 @@ int main (int argc, char *argv[]) {
         char* shmp;
 
         int shmid;
-        if((shmid = get_block(0666)) == -1){
+        if((shmid = get_block(PERMISSION_FLAGS)) == -1){
             perror("[view] get_block");
             return EXIT_FAILURE;
         }

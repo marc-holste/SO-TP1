@@ -95,8 +95,7 @@ void toString(int num,char* resp){
         }
 
         //The amount of slaves is 5% of the amount of files to process(Example is 3)
-        //int slaves_dim = argc/20 + 1;
-        int slaves_dim = 5;
+        int slaves_dim = argc/20 + 1;
 
         //Limit the amount of slaves to max at 99
         if(slaves_dim > MAX_SLAVES) {

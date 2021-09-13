@@ -8,7 +8,7 @@
 #define PARSE_CPU         " -e \"CPU time.*\""
 #define PARSE_VAL         " -e \".*SATISFIABLE\""
 
-#define SLAVE_ID_MAX 20
+#define SLAVE_ID_MAX 23             // slaveID default message + MAX integer + \0 = 23 characters
 
 void serror (const char *err) {
     fprintf(stderr, "[slave] %s", err);
