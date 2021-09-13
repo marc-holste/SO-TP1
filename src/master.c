@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "include/masterSlave.h"
 #include "include/shared_mem.h"
+#include "include/sem_manager.h"
 
 #define POUT_PATH "/tmp/pout"
 #define PIN_PATH "/tmp/pin"
@@ -77,14 +78,9 @@ void toString(int num,char* resp){
         char* shmp = shm_base;                        // Used to change the direction pointed by shmp without altering its value
 
         // Creates semaphore, deleting any other with the same name, unless the user doesn´t have access to it
-        if(sem_unlink(COUNT_SEM_NAME) == -1 && errno == EACCES){
-            perror("[master] sem_unlink");
-            return EXIT_FAILURE;
-        }
-
-        sem_t* semaphore = sem_open(COUNT_SEM_NAME, O_CREAT, SEM_MODE, 0);
+        sem_type semaphore = create_semaphore(COUNT_SEM_NAME, 0, SEM_PERMISSIONS);
         if(semaphore == SEM_FAILED){
-            perror("[master] sem_open");
+            perror("[master] create_semaphore");
             return EXIT_FAILURE;
         }
 
@@ -195,8 +191,8 @@ void toString(int num,char* resp){
                     }
 
                     fprintf(outputfile,"%s", shmp);
-                    if(sem_post(semaphore) == -1){
-                        perror("[master] sem_post");
+                    if(semaphore_post(semaphore) == -1){
+                        perror("[master] semaphore_post");
                         fclose(outputfile);
                         return EXIT_FAILURE;
                     }
@@ -221,8 +217,8 @@ void toString(int num,char* resp){
             perror("[master] detach_block");
             return EXIT_FAILURE;
         }
-        if(sem_close(semaphore) == -1){
-            perror("[master] sem_close");
+        if(close_semaphore(semaphore) == -1){
+            perror("[master] close_semaphore");
             return EXIT_FAILURE;
         }
     }
