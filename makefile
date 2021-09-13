@@ -64,7 +64,7 @@ test-pvs-studio:
 	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o $(PVS_OUT_FOLDER)/report.tasks $(PVS_OUT_FOLDER)/PVS-Studio.log
 	mv strace_out $(PVS_OUT_FOLDER)/strace_out
 
-test-cpp-check:
+test-cppcheck:
 	mkdir -p $(CPP_OUT_FOLDER);
 	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(CPP_OUT_FOLDER)/cppcheck-report.txt
 
@@ -75,7 +75,7 @@ test-valgrind:
 
 test:
 	make test-pvs-studio
-	make test-cpp-check
+	make test-cppcheck
 	make test-valgrind
 
 .PHONY: all compile install clean delete run test
