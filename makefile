@@ -18,7 +18,7 @@ TEST_FOLDER=test
 INCLUDE_FOLDER=$(SOURCES_FOLDER)/include
 
 PVS_LIC_PATH=../.config/PVS-Studio/PVS-Studio.lic
-PVS_OUT_FOLDER=test/pvs-studio
+PVS_OUT_FOLDER=$(TEST_FOLDER)/pvs-studio
 
 INPUT_FILES=files/*
 OUTPUT_FILE=out.txt
@@ -58,9 +58,9 @@ pvs-studio:
 	mkdir -p $(PVS_OUT_FOLDER)/
 	make clean
 	pvs-studio-analyzer trace -- make
-	pvs-studio-analyzer analyze --compiler $(CC) -j2 -o test/pvs-studio/PVS-Studio.log
-	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o test/pvs-studio/report.tasks test/pvs-studio/PVS-Studio.log
-	mv strace_out test/pvs-studio/strace_out
+	pvs-studio-analyzer analyze --compiler $(CC) -j2 -o $(PVS_OUT_FOLDER)/PVS-Studio.log
+	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o $(PVS_OUT_FOLDER)/report.tasks $(PVS_OUT_FOLDER)/PVS-Studio.log
+	mv strace_out $(PVS_OUT_FOLDER)/strace_out
 
 test:
 	mkdir -p $(TEST_FOLDER);
