@@ -7,17 +7,18 @@
 #define POUT_PATH "/tmp/pout"
 #define PIN_PATH "/tmp/pin"
 #define MAX_SLAVES 99
-#define MAX_SLAVES_DIGIT 3 //max amount of slaves 99 + '0' (end of string)
+#define MAX_SLAVES_DIGIT 3                     // Max amount of slaves: 99 + '0' (end of string)
 #define PIPE_PATH_MAX 20
 
 #define SHM_SIZE            1048576            // 1MB block size
 #define PERMISSION_FLAGS    0666               // Could also or all predefined permission flags, but less practical
+#define INIT_SLEEP_TIME     2
 
 void merror (const char *err) {
     fprintf(stderr, "[master] %s", err);
 }
 
-//returns the highest value of the set of file descriptors
+// Returns the highest value of the set of file descriptors
 int max_fd(int fd_slaves[],int dim) {
     if(dim <= 0) {
         return -1;
@@ -58,11 +59,13 @@ void toString(int num,char* resp){
 	return;
 }
 
- int main (int argc, char *argv[]) {
+int main (int argc, char *argv[]) {
     if(argc < 2) {
         merror("No files to process\n");
         exit(EXIT_FAILURE);
     } else {
+        setvbuf(stdout, NULL, _IONBF, 0);
+        sleep(INIT_SLEEP_TIME);
 
         int shmid = create_block(SHM_SIZE, PERMISSION_FLAGS);
         if(shmid == -1){
