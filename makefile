@@ -75,7 +75,7 @@ test-valgrind:
 
 test:
 	make test-pvs-studio
-	make test-valgrind
 	make test-cpp-check
+	make test-valgrind
 
 .PHONY: all compile install clean delete run test
