@@ -19,7 +19,8 @@
         "errno-base.h": "c",
         "stat.h": "c",
         "stdio.h": "c",
-        "sem.h": "c"
+        "sem.h": "c",
+        "typesizes.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }
