@@ -42,12 +42,10 @@ void createSlaves(int slaves_dim, int pout_set[slaves_dim], int pin_set[slaves_d
             if(pid == -1) {
                 merror("fork error:");
                 exit(EXIT_FAILURE);
-            } 
-            //slave
+            }
             if(pid == 0) {
                 execl("./bin/slave","./bin/slave",pout_path,pin_path,NULL);
             }
-            //master
             else {
                 connectNamedPipe(&pout_set[slave-1],pout_path,O_WRONLY);
                 connectNamedPipe(&pin_set[slave-1],pin_path,O_RDONLY);
@@ -84,14 +82,12 @@ int main (int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        char* shm_base = attach_block(shmid);
+        char* shm_base = attach_block(shmid);               // Need base value of shm for block_detach
         if((long long)shm_base == -1){
             perror("[master] attach_block");
             exit(EXIT_FAILURE);
         }
-        char* shmp = shm_base;                        // Used to change the direction pointed by shmp without altering its value
-
-        // Creates semaphore, deleting any other with the same name, unless the user doesn´t have access to it
+        char* shmp = shm_base;
         sem_type semaphore = create_semaphore(COUNT_SEM_NAME, 0, SEM_PERMISSIONS);
         if(semaphore == SEM_FAILED){
             perror("[master] create_semaphore");
@@ -101,15 +97,13 @@ int main (int argc, char *argv[]) {
         //the amount of files to process. Data for view
         printf("%d\n",argc-1);
 
-        //creates outputfile
         FILE *outputfile = fopen(OUTPUT_NAME,"w");
         if(outputfile == NULL) {
             merror("Open output file error\n");
             exit(EXIT_FAILURE);
         }
 
-        int slaves_dim = 2;
-        //int slaves_dim = argc/20 + 1;
+        int slaves_dim = argc/20 + 1;
         if(slaves_dim > MAX_SLAVES) {
             slaves_dim = MAX_SLAVES;
         }
@@ -135,7 +129,6 @@ int main (int argc, char *argv[]) {
         int read_bytes = 0;
         const size_t data_size = (SHM_SIZE / argc-1);         // MAX size of each block sent to view
         
-        //while there are files to process
         while(files_sent != files_processed) {
             
             //reset set for select
@@ -144,7 +137,6 @@ int main (int argc, char *argv[]) {
                 FD_SET(pin_set[slaves-1], &fd_set_slaves);
             }
 
-            //waits until a slave finishes
             if(select(maxfd+1,&fd_set_slaves,NULL,NULL,NULL) == -1) {
                 perror("[master] select");
                 exit(EXIT_FAILURE);
