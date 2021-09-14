@@ -9,6 +9,7 @@ SOURCES_VIEW=$(SOURCES_FOLDER)/view.c
 SOURCES_SHM=$(SOURCES_FOLDER)/shared_mem.c
 SOURCES_SEM=$(SOURCES_FOLDER)/sem_manager.c
 
+INPUT_FOLDER=files
 OUTPUT_FOLDER=bin
 OUTPUT_MASTER=$(OUTPUT_FOLDER)/solve
 OUTPUT_SLAVE=$(OUTPUT_FOLDER)/slave
@@ -39,7 +40,7 @@ $(OUTPUT_VIEW): $(SOURCES_VIEW) $(SOURCES_SHM) $(SOURCES_SEM)
 compile: all
 
 install:
-	mkdir -p $(OUTPUT_FOLDER); apt-get install minisat
+	mkdir -p $(OUTPUT_FOLDER); mkdir -p $(INPUT_FOLDER); apt-get install minisat
 
 clean:
 	rm -rf $(OUTPUT_FOLDER)/* $(OUTPUT_FILE) $(TEST_FOLDER)/*
@@ -47,35 +48,34 @@ clean:
 delete:
 	rm -rf $(OUTPUT_FOLDER)/*
 
-run:
-	rm -rf $(OUTPUT_FILE); $(OUTPUT_MASTER) $(INPUT_FILES)
-
 # ---------------------------------------------------------------------------------------------------------------------------------
 # To install license for PVS-Studio, do:
 # apt-get update
 # apt-get install pvs-studio
 # pvs-studio-analyzer credentials "PVS-Studio Free" "FREE-FREE-FREE-FREE"
 # ---------------------------------------------------------------------------------------------------------------------------------
-test-pvs-studio:
-	mkdir -p $(PVS_OUT_FOLDER);
-	make clean
-	pvs-studio-analyzer trace -- make
-	pvs-studio-analyzer analyze --compiler $(CC) -j2 -o $(PVS_OUT_FOLDER)/PVS-Studio.log
-	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o $(PVS_OUT_FOLDER)/report.tasks $(PVS_OUT_FOLDER)/PVS-Studio.log
-	mv strace_out $(PVS_OUT_FOLDER)/strace_out
 
-test-cppcheck:
-	mkdir -p $(CPP_OUT_FOLDER);
-	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(CPP_OUT_FOLDER)/cppcheck-report.txt
+#
+#test-pvs-studio:
+#	mkdir -p $(PVS_OUT_FOLDER);
+#	make clean
+#	pvs-studio-analyzer trace -- make
+#	pvs-studio-analyzer analyze --compiler $(CC) -j2 -o $(PVS_OUT_FOLDER)/PVS-Studio.log
+#	plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o $(PVS_OUT_FOLDER)/report.tasks $(PVS_OUT_FOLDER)/PVS-Studio.log
+#	mv strace_out $(PVS_OUT_FOLDER)/strace_out
 
-test-valgrind:
-	mkdir -p $(VALGRIND_OUT_FOLDER);
-	valgrind --log-file="$(VALGRIND_OUT_FOLDER)/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
-	valgrind --log-file="$(VALGRIND_OUT_FOLDER)/view-report.txt" $(OUTPUT_VIEW) 13;
+#test-cppcheck:
+#	mkdir -p $(CPP_OUT_FOLDER);
+#	cppcheck --quiet --enable=all --force --inconclusive $(SOURCES_FOLDER) 2> $(CPP_OUT_FOLDER)/cppcheck-report.txt
 
-test:
+#test-valgrind:
+#	mkdir -p $(VALGRIND_OUT_FOLDER);
+#	valgrind --log-file="$(VALGRIND_OUT_FOLDER)/master-report.txt" $(OUTPUT_MASTER) $(INPUT_FILES);
+#	valgrind --log-file="$(VALGRIND_OUT_FOLDER)/view-report.txt" $(OUTPUT_VIEW) 13;
+
+#test:
 #make test-pvs-studio
-	make test-cppcheck
-	make test-valgrind
+#	make test-cppcheck
+#	make test-valgrind
 
-.PHONY: all compile install clean delete run test
+.PHONY: all compile install clean delete 
