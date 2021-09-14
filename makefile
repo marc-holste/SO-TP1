@@ -15,13 +15,13 @@ OUTPUT_MASTER=$(OUTPUT_FOLDER)/solve
 OUTPUT_SLAVE=$(OUTPUT_FOLDER)/slave
 OUTPUT_VIEW=$(OUTPUT_FOLDER)/view
 
-TEST_FOLDER=test
+# TEST_FOLDER=test
 INCLUDE_FOLDER=$(SOURCES_FOLDER)/include
 
-VALGRIND_OUT_FOLDER=$(TEST_FOLDER)/valgrind
-CPP_OUT_FOLDER=$(TEST_FOLDER)/cppcheck
-PVS_LIC_PATH=../.config/PVS-Studio/PVS-Studio.lic
-PVS_OUT_FOLDER=$(TEST_FOLDER)/pvs-studio
+#VALGRIND_OUT_FOLDER=$(TEST_FOLDER)/valgrind
+#CPP_OUT_FOLDER=$(TEST_FOLDER)/cppcheck
+#PVS_LIC_PATH=../.config/PVS-Studio/PVS-Studio.lic
+#PVS_OUT_FOLDER=$(TEST_FOLDER)/pvs-studio
 
 INPUT_FILES=files/*
 OUTPUT_FILE=out.txt
@@ -43,7 +43,7 @@ install:
 	mkdir -p $(OUTPUT_FOLDER); mkdir -p $(INPUT_FOLDER); apt-get install minisat
 
 clean:
-	rm -rf $(OUTPUT_FOLDER)/* $(OUTPUT_FILE) $(TEST_FOLDER)/*
+	rm -rf $(OUTPUT_FOLDER)/* $(OUTPUT_FILE)
 
 delete:
 	rm -rf $(OUTPUT_FOLDER)/*
