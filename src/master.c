@@ -8,7 +8,6 @@
 #define PIN_PATH "/tmp/pin"
 #define MAX_SLAVES 99
 #define MAX_SLAVES_DIGIT 3                     // Max amount of slaves: 99 + '0' (end of string)
-#define PIPE_PATH_MAX 20
 
 #define SHM_SIZE            1048576            // 1MB block size
 #define PERMISSION_FLAGS    0666               // Could also or all predefined permission flags, but less practical
@@ -16,6 +15,45 @@
 
 void merror (const char *err) {
     fprintf(stderr, "[master] %s", err);
+}
+
+void createNamedPipe(int slave, char path[PIPE_PATH_MAX]) {
+    char digit[MAX_SLAVES_DIGIT]; 
+    sprintf(digit,"%d",slave);
+    strcat(path,digit);
+    remove(path);
+    if(mkfifo(path, S_IRUSR|S_IWUSR) == -1){
+        merror("mkfifo path error");
+        exit(EXIT_FAILURE);
+    }
+    return;
+}
+
+void createSlaves(int slaves_dim, int pout_set[slaves_dim], int pin_set[slaves_dim]) {
+    for(int slave=1;slave<=slaves_dim;slave++) {
+            
+            char pout_path[PIPE_PATH_MAX] = POUT_PATH; 
+            char pin_path[PIPE_PATH_MAX] = PIN_PATH;
+            createNamedPipe(slave,pout_path);
+            createNamedPipe(slave,pin_path);
+
+            pid_t pid;
+            pid = fork();
+            if(pid == -1) {
+                merror("fork error:");
+                exit(EXIT_FAILURE);
+            } 
+            //slave
+            if(pid == 0) {
+                execl("./bin/slave","./bin/slave",pout_path,pin_path,NULL);
+            }
+            //master
+            else {
+                connectNamedPipe(&pout_set[slave-1],pout_path,O_WRONLY);
+                connectNamedPipe(&pin_set[slave-1],pin_path,O_RDONLY);
+            }
+        }
+        return;
 }
 
 // Returns the highest value of the set of file descriptors
@@ -32,33 +70,6 @@ int max_fd(int fd_slaves[],int dim) {
     return maxfd;
 }
 
-void toString(int num,char* resp){
-	int digit=0;
-
-    if(num!=0){
-        // Builds the number in the array
-		while(num!=0){
-			resp[digit]=(num%10)+'0';
-			num=num/10;
-			digit++;
-		}
-        
-        //inverts the number order
-		for(int i=0, aux;i<digit/2;i++){
-			aux=resp[i];
-			resp[i]=resp[digit-i-1];
-			resp[digit-i-1]=aux;
-		}
-		resp[digit]=0;
-	}
-    else{
-		resp[digit++]='0';
-	}
-    //adds the final 0
-    resp[digit]=0;
-	return;
-}
-
 int main (int argc, char *argv[]) {
     if(argc < 2) {
         merror("No files to process\n");
@@ -70,13 +81,13 @@ int main (int argc, char *argv[]) {
         int shmid = create_block(SHM_SIZE, PERMISSION_FLAGS);
         if(shmid == -1){
             perror("[master] create_block");
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
 
         char* shm_base = attach_block(shmid);
         if((long long)shm_base == -1){
             perror("[master] attach_block");
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
         char* shmp = shm_base;                        // Used to change the direction pointed by shmp without altering its value
 
@@ -84,7 +95,7 @@ int main (int argc, char *argv[]) {
         sem_type semaphore = create_semaphore(COUNT_SEM_NAME, 0, SEM_PERMISSIONS);
         if(semaphore == SEM_FAILED){
             perror("[master] create_semaphore");
-            return EXIT_FAILURE;
+            exit(EXIT_FAILURE);
         }
 
         //the amount of files to process. Data for view
@@ -97,59 +108,14 @@ int main (int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        //The amount of slaves is 5% of the amount of files to process(Example is 3)
-        int slaves_dim = argc/20 + 1;
-
-        //Limit the amount of slaves to max at 99
+        int slaves_dim = 2;
+        //int slaves_dim = argc/20 + 1;
         if(slaves_dim > MAX_SLAVES) {
             slaves_dim = MAX_SLAVES;
         }
-
         int pout_set[slaves_dim];
         int pin_set[slaves_dim];
-        for(int slaves=1;slaves<=slaves_dim;slaves++) {
-            
-            //creating named pipes
-            char digit[MAX_SLAVES_DIGIT]; 
-            char pout_path[PIPE_PATH_MAX] = POUT_PATH; 
-            char pin_path[PIPE_PATH_MAX] = PIN_PATH;
-            toString(slaves,digit);
-            strcat(pout_path,digit);
-            strcat(pin_path,digit);
-            remove(pout_path);
-            remove(pin_path);
-            if(mkfifo(pout_path, S_IRUSR|S_IWUSR) == -1){
-                merror("mkfifo pout error");
-                exit(EXIT_FAILURE);
-            }
-            if(mkfifo(pin_path, S_IRUSR|S_IWUSR) == -1){
-                merror("mkfifo pin error");
-                exit(EXIT_FAILURE);
-            }
-            //creating slaves
-            pid_t pid;
-            pid = fork();
-            if(pid == -1) {
-                merror("fork error:");
-                exit(EXIT_FAILURE);
-            } 
-            //slave
-            if(pid == 0) {
-                execl("./bin/slave","./bin/slave",pout_path,pin_path,NULL);
-            }
-            //master
-            else {
-                //connects pipes with slave
-                if((pout_set[slaves-1] = open(pout_path, O_WRONLY)) == -1){
-                    merror("Error in Open Pout");
-                    exit(EXIT_FAILURE);
-                }
-                if((pin_set[slaves-1] = open(pin_path, O_RDONLY)) == -1){
-                    merror("Error in Open Pin");
-                    exit(EXIT_FAILURE);
-                }
-            }
-        }
+        createSlaves(slaves_dim,pout_set,pin_set);
 
         //file index (file 0 is ./solve)
         int files_sent = 0;
@@ -159,10 +125,11 @@ int main (int argc, char *argv[]) {
         int maxfd = max_fd(pin_set,slaves_dim);
         fd_set fd_set_slaves;
 
-        //send first set of files to process
         for(int slaves=1;slaves<=slaves_dim;slaves++) {
-            write(pout_set[slaves-1],argv[files_sent+1],strlen(argv[files_sent+1])+1);
-            files_sent++; 
+            for(int initial_load=1; initial_load <= slaves_dim;initial_load++) {
+                write(pout_set[slaves-1],argv[files_sent+1],strlen(argv[files_sent+1])+1);
+                files_sent++; 
+            }
         }
         
         int read_bytes = 0;
@@ -189,14 +156,13 @@ int main (int argc, char *argv[]) {
                     if(read_bytes == -1){
                         perror("[master] read");
                         fclose(outputfile);
-                        return EXIT_FAILURE;
+                        exit(EXIT_FAILURE);
                     }
 
                     fprintf(outputfile,"%s", shmp);
                     if(semaphore_post(semaphore) == -1){
                         perror("[master] semaphore_post");
-                        fclose(outputfile);
-                        return EXIT_FAILURE;
+                        exit(EXIT_FAILURE);
                     }
                     shmp += read_bytes + 1;
                     files_processed++;

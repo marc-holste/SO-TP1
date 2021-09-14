@@ -55,41 +55,30 @@ void exec_minisat(char file_path[PIPE_BUF],int fd_write) {
 
 //expected arguments:
 //  argv[0] = ./bin/slave
-//  argv[1] = fifo_read
-//  argv[2] = fifi_write
+//  argv[1] = fd_read
+//  argv[2] = fd_write
 int main(int argc, char *argv[]) {
     if(argc < 3) {
         serror("Not enough arguments");
         exit(EXIT_FAILURE);
     }
+    int fd_read,fd_write;
+    connectNamedPipe(&fd_read,argv[1],O_RDONLY);
+    connectNamedPipe(&fd_write,argv[2],O_WRONLY);
+
     char file_paths[PIPE_BUF];
     char file_path[PIPE_BUF];
-    int fd_read,fd_write;
-    
-    //WARNING! Maybe we should check what the arguments are before trying to open them. 
-
-    //connects pipes with master
-    if((fd_read = open(argv[1], O_RDONLY)) == -1){
-        serror("Open fd_read error");
-        exit(EXIT_FAILURE);
-    }
-    if((fd_write = open(argv[2], O_WRONLY)) == -1){
-        serror("Open fd_write error");
-        exit(EXIT_FAILURE);
-    }
-
-    //red is past tence of read spelled wrong to use another word other than read
-    int red;
+    int read_bytes;
     int index_file_path = 0;
     //reads until master closes pipe
-    while((red = read(fd_read, file_paths, sizeof(file_paths))) > 0) {
+    while((read_bytes = read(fd_read, file_paths, sizeof(file_paths))) > 0) {
         
         //if only one file_path was sent
-        if(strlen(file_paths)+1 == (unsigned long int)red) {
+        if(strlen(file_paths)+1 == (size_t)read_bytes) {
             exec_minisat(file_paths,fd_write);
         //if more then one file_path was sent
         } else {
-            for(int i=0;i<red;i++) {
+            for(int i=0;i<read_bytes;i++) {
                 if(file_paths[i] == 0) {
                     file_path[index_file_path] = 0;
                     index_file_path = 0;
@@ -100,7 +89,6 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    //close pipes
     close(fd_write);
     close(fd_read);
     return EXIT_SUCCESS;

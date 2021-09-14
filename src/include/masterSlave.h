@@ -14,6 +14,14 @@
 #include "sem_manager.h"
 #include "shared_mem.h"
 
+#define PIPE_PATH_MAX 20
+
 #define OUTPUT_NAME "out.txt"
 
-int slave(char *fifo_read,char *fifo_write);
+void connectNamedPipe(int *fd, char path[PIPE_PATH_MAX], int flag) {
+    if((*fd = open(path, flag)) == -1){
+        perror("Error in open named pipe\n");
+        exit(EXIT_FAILURE);
+    }
+    return;
+}
