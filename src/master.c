@@ -30,6 +30,7 @@ void createNamedPipe(int slave, char path[PIPE_PATH_MAX]) {
 }
 
 void createSlaves(int slaves_dim, int pout_set[slaves_dim], int pin_set[slaves_dim]) {
+    
     for(int slave=1;slave<=slaves_dim;slave++) {
             
             char pout_path[PIPE_PATH_MAX] = POUT_PATH; 
@@ -44,6 +45,10 @@ void createSlaves(int slaves_dim, int pout_set[slaves_dim], int pin_set[slaves_d
                 exit(EXIT_FAILURE);
             }
             if(pid == 0) {
+                for(int slaves=1;slaves<=slave-1;slaves++) {
+                    close(pout_set[slaves-1]);
+                    close(pin_set[slaves-1]);
+                }
                 execl("./bin/slave","./bin/slave",pout_path,pin_path,NULL);
             }
             else {
